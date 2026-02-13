@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG - EBSERH Study</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .rag-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+        .feature-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .upload-area {
+            border: 3px dashed #007bff;
+            border-radius: 15px;
+            padding: 3rem;
+            text-align: center;
+            background: #f8f9ff;
+            transition: all 0.3s ease;
+        }
+        .upload-area:hover {
+            background: #e7f3ff;
+            border-color: #0056b3;
+        }
+        .upload-area.dragover {
+            background: #e7f3ff;
+            border-color: #0056b3;
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-graduation-cap me-2"></i>
+                EBSERH Study
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/questoes">
+                    <i class="fas fa-list me-1"></i> Questões
+                </a>
+                <a class="nav-link" href="/importar">
+                    <i class="fas fa-upload me-1"></i> Importar
+                </a>
+                <a class="nav-link active" href="/rag">
+                    <i class="fas fa-robot me-1"></i> RAG
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container rag-container">
+        <div class="text-center mb-5">
+            <h1 class="display-4 mb-3">
+                <i class="fas fa-brain text-primary me-3"></i>
+                RAG - Retrieval-Augmented Generation
+            </h1>
+            <p class="lead text-muted">
+                Upload de PDFs, geração automática de questões e chat inteligente com base no conteúdo
+            </p>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card feature-card">
+                    <div class="card-body">
+                        <h3 class="card-title text-center mb-4">
+                            <i class="fas fa-cloud-upload-alt text-primary feature-icon"></i>
+                            Upload de Documentos
+                        </h3>
+                        
+                        <div class="upload-area" id="uploadArea">
+                            <i class="fas fa-file-pdf fa-3x text-danger mb-3"></i>
+                            <h4>Arraste um PDF aqui ou clique para selecionar</h4>
+                            <p class="text-muted">O sistema irá extrair o texto, criar embeddings e preparar para análise</p>
+                            <input type="file" id="pdfFile" accept=".pdf" style="display: none;">
+                            <button class="btn btn-primary btn-lg" onclick="document.getElementById('pdfFile').click()">
+                                <i class="fas fa-folder-open me-2"></i> Selecionar PDF
+                            </button>
+                        </div>
+                        
+                        <div id="uploadProgress" style="display: none;" class="mt-3">
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%">
+                                    Processando documento...
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="uploadResult" style="display: none;" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card feature-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-comments text-info feature-icon"></i>
+                        <h5 class="card-title">Chat Inteligente</h5>
+                        <p class="card-text">Faça perguntas sobre o conteúdo dos documentos e receba respostas baseadas no texto</p>
+                        <a href="/rag/chat" class="btn btn-info">
+                            <i class="fas fa-comment-dots me-2"></i> Abrir Chat
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card feature-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-file-alt text-success feature-icon"></i>
+                        <h5 class="card-title">Gerar Questões</h5>
+                        <p class="card-text">Crie questões automaticamente baseadas no conteúdo dos documentos</p>
+                        <a href="/rag/documents" class="btn btn-success">
+                            <i class="fas fa-magic me-2"></i> Gerar Questões
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card feature-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-folder text-warning feature-icon"></i>
+                        <h5 class="card-title">Meus Documentos</h5>
+                        <p class="card-text">Visualize e gerencie todos os documentos processados</p>
+                        <a href="/rag/documents" class="btn btn-warning">
+                            <i class="fas fa-list me-2"></i> Ver Documentos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How it Works -->
+        <div class="card feature-card">
+            <div class="card-body">
+                <h3 class="text-center mb-4">
+                    <i class="fas fa-cogs text-primary me-2"></i>
+                    Como Funciona
+                </h3>
+                
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3">
+                        <div class="p-3">
+                            <i class="fas fa-file-pdf fa-3x text-danger mb-3"></i>
+                            <h5>1. Upload do PDF</h5>
+                            <p class="text-muted">Envie o documento que deseja analisar</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="p-3">
+                            <i class="fas fa-cut fa-3x text-info mb-3"></i>
+                            <h5>2. Chunking</h5>
+                            <p class="text-muted">O texto é dividido em pedaços menores</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="p-3">
+                            <i class="fas fa-brain fa-3x text-primary mb-3"></i>
+                            <h5>3. Embeddings</h5>
+                            <p class="text-muted">Cria representações vetoriais do conteúdo</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="p-3">
+                            <i class="fas fa-search fa-3x text-success mb-3"></i>
+                            <h5>4. Busca & Geração</h5>
+                            <p class="text-muted">Busca semântica e geração de respostas</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const pdfFile = document.getElementById('pdfFile');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const uploadResult = document.getElementById('uploadResult');
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type === 'application/pdf') {
+                handleFileUpload(files[0]);
+            } else {
+                showAlert('Por favor, envie apenas arquivos PDF', 'danger');
+            }
+        });
+
+        pdfFile.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileUpload(e.target.files[0]);
+            }
+        });
+
+        function handleFileUpload(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            uploadProgress.style.display = 'block';
+            uploadResult.style.display = 'none';
+
+            fetch('/rag/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                uploadProgress.style.display = 'none';
+                
+                if (data.status === 'sucesso') {
+                    showAlert(data.message, 'success');
+                    setTimeout(() => {
+                        window.location.href = '/rag/documents';
+                    }, 2000);
+                } else {
+                    showAlert(data.error || 'Erro ao processar documento', 'danger', data.suggestions || null);
+                }
+            })
+            .catch(error => {
+                uploadProgress.style.display = 'none';
+                showAlert('Erro de conexão: ' + error.message, 'danger');
+            });
+        }
+
+        function showAlert(message, type, suggestions = null) {
+            let alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-start">
+                        <div class="flex-grow-1">
+                            ${message}
+                            ${suggestions ? `
+                                <div class="mt-3">
+                                    <strong><i class="fas fa-lightbulb me-2"></i>Sugestões:</strong>
+                                    <ul class="mb-0 mt-2">
+                                        ${suggestions.map(s => `<li>${s}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </div>
+            `;
+            uploadResult.innerHTML = alertHtml;
+            uploadResult.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões RAG - EBSERH Study</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .question-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+        .question-card:hover {
+            transform: translateY(-3px);
+        }
+        .difficulty-badge {
+            font-size: 0.75rem;
+        }
+        .answer-option {
+            padding: 0.75rem;
+            margin: 0.25rem 0;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .answer-option:hover {
+            border-color: #007bff;
+            background: #f8f9ff;
+        }
+        .answer-option.selected {
+            border-color: #007bff;
+            background: #e7f3ff;
+        }
+        .answer-option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        .answer-option.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-graduation-cap me-2"></i>
+                EBSERH Study
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/questoes">
+                    <i class="fas fa-list me-1"></i> Questões
+                </a>
+                <a class="nav-link" href="/importar">
+                    <i class="fas fa-upload me-1"></i> Importar
+                </a>
+                <a class="nav-link active" href="/rag">
+                    <i class="fas fa-robot me-1"></i> RAG
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="fas fa-file-alt text-primary me-2"></i>
+                Questões Geradas por RAG
+            </h2>
+            <a href="/rag/documents" class="btn btn-primary">
+                <i class="fas fa-arrow-left me-2"></i> Voltar aos Documentos
+            </a>
+        </div>
+
+        {% if questions %}
+            <div class="row">
+                {% for question in questions %}
+                <div class="col-lg-6">
+                    <div class="card question-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <span class="badge difficulty-badge bg-{{ 
+                                    'success' if question.difficulty == 'Fácil' else 
+                                    'warning' if question.difficulty == 'Médio' else 'danger' 
+                                }}">
+                                    {{ question.difficulty }}
+                                </span>
+                                <small class="text-muted">{{ question.created_at[:10] }}</small>
+                            </div>
+                            
+                            <h6 class="card-title mb-3">{{ question.question }}</h6>
+                            
+                            <div class="alternatives mb-3" id="alternatives-{{ question.id }}">
+                                {% for letter, text in question.alternatives.items() %}
+                                <div class="answer-option" onclick="selectAnswer({{ question.id }}, '{{ letter }}', this)">
+                                    <strong>{{ letter }}.</strong> {{ text }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-book me-1"></i> {{ question.discipline }}
+                                </small>
+                                <button class="btn btn-sm btn-outline-primary" onclick="showExplanation({{ question.id }})">
+                                    <i class="fas fa-lightbulb me-1"></i> Ver Gabarito
+                                </button>
+                            </div>
+                            
+                            <div id="explanation-{{ question.id }}" style="display: none;" class="mt-3 p-3 bg-light rounded">
+                                <strong>Resposta Correta:</strong> {{ question.correct_answer }}<br>
+                                <strong>Explicação:</strong> {{ question.explanation }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-question-circle fa-4x text-muted mb-4"></i>
+                <h3 class="text-muted">Nenhuma questão gerada</h3>
+                <p class="text-muted">Gere questões a partir dos documentos para começar</p>
+                <a href="/rag/documents" class="btn btn-primary btn-lg">
+                    <i class="fas fa-magic me-2"></i> Gerar Questões
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const correctAnswers = {
+            {% for question in questions %}
+            {{ question.id }}: '{{ question.correct_answer }}',
+            {% endfor %}
+        };
+
+        function selectAnswer(questionId, selectedLetter, element) {
+            // Remove seleção anterior
+            const alternatives = document.getElementById(`alternatives-${questionId}`);
+            alternatives.querySelectorAll('.answer-option').forEach(opt => {
+                opt.classList.remove('selected', 'correct', 'incorrect');
+            });
+            
+            // Adicionar seleção atual
+            element.classList.add('selected');
+            
+            // Verificar resposta após um pequeno delay
+            setTimeout(() => {
+                const correctAnswer = correctAnswers[questionId];
+                const allOptions = alternatives.querySelectorAll('.answer-option');
+                
+                allOptions.forEach(opt => {
+                    const optionLetter = opt.getAttribute('onclick').match(/'([ABCD])'/)[1];
+                    if (optionLetter === correctAnswer) {
+                        opt.classList.add('correct');
+                    } else if (opt === element) {
+                        opt.classList.add('incorrect');
+                    }
+                });
+                
+                // Mostrar explicação
+                showExplanation(questionId);
+            }, 500);
+        }
+
+        function showExplanation(questionId) {
+            const explanation = document.getElementById(`explanation-${questionId}`);
+            if (explanation) {
+                explanation.style.display = explanation.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        // Adicionar botão para responder todas as questões
+        function answerAllQuestions() {
+            {% for question in questions %}
+            // Simular clique na resposta correta
+            const correctOption = document.querySelector(`#alternatives-{{ question.id }} .answer-option[onclick*="{{ question.correct_answer }}"]`);
+            if (correctOption) {
+                selectAnswer({{ question.id }}, '{{ question.correct_answer }}', correctOption);
+            }
+            {% endfor %}
+        }
+
+        // Adicionar botão flutuante para responder todas
+        document.addEventListener('DOMContentLoaded', function() {
+            {% if questions %}
+            const fabButton = document.createElement('button');
+            fabButton.className = 'btn btn-success position-fixed';
+            fabButton.style.cssText = 'bottom: 20px; right: 20px; z-index: 1000; border-radius: 50px; padding: 15px;';
+            fabButton.innerHTML = '<i class="fas fa-check-double"></i> Responder Todas';
+            fabButton.onclick = answerAllQuestions;
+            document.body.appendChild(fabButton);
+            {% endif %}
+        });
+    </script>
+</body>
+</html>

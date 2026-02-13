@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentos RAG - EBSERH Study</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .document-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
+        .document-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .document-icon {
+            font-size: 2.5rem;
+            color: #dc3545;
+        }
+        .action-buttons .btn {
+            margin: 0.25rem;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-graduation-cap me-2"></i>
+                EBSERH Study
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/questoes">
+                    <i class="fas fa-list me-1"></i> Questões
+                </a>
+                <a class="nav-link" href="/importar">
+                    <i class="fas fa-upload me-1"></i> Importar
+                </a>
+                <a class="nav-link active" href="/rag">
+                    <i class="fas fa-robot me-1"></i> RAG
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="fas fa-folder-open text-primary me-2"></i>
+                Meus Documentos
+            </h2>
+            <a href="/rag" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i> Novo Documento
+            </a>
+        </div>
+
+        {% if documents %}
+            <div class="row">
+                {% for doc in documents %}
+                <div class="col-lg-6 col-xl-4">
+                    <div class="card document-card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start">
+                                <div class="me-3">
+                                    <i class="fas fa-file-pdf document-icon"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="card-title">{{ doc.title or doc.filename }}</h5>
+                                    <p class="card-text text-muted small">
+                                        <i class="fas fa-file me-1"></i> {{ doc.filename }}<br>
+                                        <i class="fas fa-file-alt me-1"></i> {{ doc.total_pages }} páginas<br>
+                                        <i class="fas fa-cut me-1"></i> {{ doc.total_chunks }} chunks<br>
+                                        <i class="fas fa-calendar me-1"></i> {{ doc.upload_date[:10] }}
+                                    </p>
+                                    
+                                    <div class="action-buttons">
+                                        <a href="/rag/chat?document_id={{ doc.id }}" class="btn btn-info btn-sm">
+                                            <i class="fas fa-comments me-1"></i> Chat
+                                        </a>
+                                        <button class="btn btn-success btn-sm" onclick="generateQuestions({{ doc.id }})">
+                                            <i class="fas fa-magic me-1"></i> Gerar Questões
+                                        </button>
+                                        <a href="/rag/questions/{{ doc.id }}" class="btn btn-warning btn-sm">
+                                            <i class="fas fa-list me-1"></i> Ver Questões
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-folder-open fa-4x text-muted mb-4"></i>
+                <h3 class="text-muted">Nenhum documento encontrado</h3>
+                <p class="text-muted">Faça upload de um PDF para começar a usar o RAG</p>
+                <a href="/rag" class="btn btn-primary btn-lg">
+                    <i class="fas fa-upload me-2"></i> Fazer Upload
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Modal para gerar questões -->
+    <div class="modal fade" id="generateQuestionsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-magic me-2"></i> Gerar Questões
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="generateQuestionsForm">
+                        <input type="hidden" id="documentId" name="document_id">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Número de Questões</label>
+                            <select class="form-select" name="num_questions">
+                                <option value="3">3 questões</option>
+                                <option value="5" selected>5 questões</option>
+                                <option value="10">10 questões</option>
+                                <option value="15">15 questões</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Dificuldade</label>
+                            <select class="form-select" name="difficulty">
+                                <option value="Fácil">Fácil</option>
+                                <option value="Médio" selected>Médio</option>
+                                <option value="Difícil">Difícil</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="submitGenerateQuestions()">
+                        <i class="fas fa-magic me-2"></i> Gerar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Modal -->
+    <div class="modal fade" id="progressModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body text-center py-4">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Gerando...</span>
+                    </div>
+                    <h5>Gerando questões...</h5>
+                    <p class="text-muted">Isso pode levar alguns minutos</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let generateModal;
+        let progressModal;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            generateModal = new bootstrap.Modal(document.getElementById('generateQuestionsModal'));
+            progressModal = new bootstrap.Modal(document.getElementById('progressModal'));
+        });
+
+        function generateQuestions(documentId) {
+            document.getElementById('documentId').value = documentId;
+            generateModal.show();
+        }
+
+        function submitGenerateQuestions() {
+            const form = document.getElementById('generateQuestionsForm');
+            const formData = new FormData(form);
+            
+            generateModal.hide();
+            progressModal.show();
+
+            fetch('/rag/generate_questions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    document_id: parseInt(formData.get('document_id')),
+                    num_questions: parseInt(formData.get('num_questions')),
+                    difficulty: formData.get('difficulty')
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                progressModal.hide();
+                
+                if (data.status === 'sucesso') {
+                    showAlert(`Sucesso! ${data.saved_count} de ${data.total_generated} questões geradas e salvas.`, 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    showAlert(data.error || 'Erro ao gerar questões', 'danger');
+                }
+            })
+            .catch(error => {
+                progressModal.hide();
+                showAlert('Erro de conexão: ' + error.message, 'danger');
+            });
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
