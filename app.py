@@ -18,8 +18,17 @@ from sqlalchemy import text
 from sqlalchemy.exc import ProgrammingError
 
 # Importar serviços
-from ia_service import ia_service
-from rag_service import rag_service
+try:
+    from ia_service import ia_service
+except ImportError as e:
+    print(f"AVISO: IA Service não disponível: {e}")
+    ia_service = None
+
+try:
+    from rag_service import rag_service
+except ImportError as e:
+    print(f"AVISO: RAG Service não disponível: {e}")
+    rag_service = None
 
 # ================= CONFIGURAÇÃO =================
 app = Flask(__name__, static_folder='static')
@@ -534,6 +543,9 @@ def ia_explicar_erro(questao_id):
         questao_dict['alternativas'] = json.loads(questao_dict['alternativas'])
         
         # Gerar explicação com IA
+        if not ia_service:
+            return jsonify({'error': 'IA Service não disponível'}), 503
+        
         explicacao = ia_service.explicar_erro(questao_dict, resposta_usuario)
         
         # Salvar feedback da IA
@@ -564,6 +576,9 @@ def ia_gerar_dica(questao_id):
         questao_dict['alternativas'] = json.loads(questao_dict['alternativas'])
         
         # Gerar dica com IA
+        if not ia_service:
+            return jsonify({'error': 'IA Service não disponível'}), 503
+        
         dica = ia_service.gerar_dica_memoria(questao_dict)
         
         # Salvar feedback da IA
@@ -601,6 +616,9 @@ def ia_sugerir_revisao():
             erros_recentes.append(erro_dict)
         
         # Gerar sugestão com IA
+        if not ia_service:
+            return jsonify({'error': 'IA Service não disponível'}), 503
+        
         sugestao = ia_service.sugerir_revisao(erros_recentes)
         
         return jsonify({
@@ -622,6 +640,9 @@ def ia_gerar_questoes():
         quantidade = data.get('quantidade', 1)
         
         # Gerar questões com IA
+        if not ia_service:
+            return jsonify({'error': 'IA Service não disponível'}), 503
+        
         questoes_geradas = ia_service.gerar_questao_inedita(disciplina, nivel, quantidade)
         
         return jsonify({
@@ -673,6 +694,9 @@ def ia_importar_questao_texto():
             return jsonify({'error': 'Texto da questão não fornecido'}), 400
         
         # Importar questão usando o serviço de IA
+        if not ia_service:
+            return jsonify({'error': 'IA Service não disponível'}), 503
+        
         print("DEBUG: Chamando ia_service.importar_questao_texto")
         questao = ia_service.importar_questao_texto(texto_questao, disciplina, nivel)
         

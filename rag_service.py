@@ -21,7 +21,15 @@ load_dotenv()
 
 class RAGService:
     def __init__(self):
-        self.client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+        api_key = os.getenv('OPENAI_API_KEY')
+        if not api_key:
+            print("AVISO: OPENAI_API_KEY não configurada. RAG Service desativado.")
+            self.client = None
+            self.enabled = False
+            return
+        
+        self.client = OpenAI(api_key=api_key)
+        self.enabled = True
         self.embedding_model = "text-embedding-3-small"
         self.chat_model = "gpt-4o-mini"
         self.chunk_size = 1000
