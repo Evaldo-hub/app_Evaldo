@@ -3,7 +3,6 @@ flask-sqlalchemy
 flask-login
 sqlalchemy
 psycopg2-binary
-openai>=1.30.0
 faiss-cpu
 pypdf2
 python-dotenv

@@ -23,9 +23,6 @@ Adicione estas variáveis no painel do Render → Environment:
 # Banco de Dados (OBRIGATÓRIO)
 DATABASE_URL=postgresql://postgres.texwhpgiaazpyosctjia:@Neia171427@aws-1-sa-east-1.pooler.supabase.com:5432/postgres
 
-# API OpenAI (OBRIGATÓRIO para IA)
-OPENAI_API_KEY=sk-sua-chave-openai-aqui
-
 # Configurações Flask
 FLASK_ENV=production
 SECRET_KEY=sua-chave-secreta-para-producao
@@ -61,16 +58,10 @@ curl https://seu-app.onrender.com/health
 
 ### Testar Funcionalidades
 - **Acessar**: `https://seu-app.onrender.com`
-- **Importar questões**: Funciona sem OpenAI
-- **Funcionalidades IA**: Requer OPENAI_API_KEY
+- **Importar questões**: Funciona sem IA
+- **Funcionalidades básicas**: Todas funcionam
 
 ## ⚠️ Troubleshooting
-
-### Erro: OPENAI_API_KEY
-```
-OpenAIError: The api_key client option must be set
-```
-**Solução**: Configure a variável no Render → Environment
 
 ### Erro: DATABASE_URL
 ```
@@ -86,14 +77,12 @@ Permission denied
 
 ## 📊 Status das Funcionalidades
 
-| Funcionalidade | Requer OPENAI_API_KEY | Status |
-|---------------|---------------------|--------|
-| Importação de Questões | ❌ | ✅ Funciona |
-| Listagem/Filtros | ❌ | ✅ Funciona |
-| Simulados | ❌ | ✅ Funciona |
-| IA Explicações | ✅ | ⚠️ Requer API |
-| IA Dicas | ✅ | ⚠️ Requer API |
-| IA Geração | ✅ | ⚠️ Requer API |
+| Funcionalidade | Status |
+|---------------|--------|
+| Importação de Questões | ✅ Funciona |
+| Listagem/Filtros | ✅ Funciona |
+| Simulados | ✅ Funciona |
+| Banco de Dados | ✅ Funciona |
 
 ## 🎉 Deploy Concluído!
 
@@ -101,6 +90,5 @@ Após seguir estes passos:
 - ✅ App funcionando no Render
 - ✅ Banco PostgreSQL conectado
 - ✅ Funcionalidades básicas operacionais
-- ✅ IA pronta (com API key)
 
 **Seu app EBSERH Study está no ar!** 🚀

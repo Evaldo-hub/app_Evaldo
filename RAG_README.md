@@ -9,7 +9,7 @@ O fluxo ideal é esse aqui:
 1. **Upload do PDF** → Você envia um arquivo PDF
 2. **Extração de Texto** → O backend extrai o texto do PDF
 3. **Divisão em Chunks** → O texto é dividido em pedaços menores
-4. **Embeddings** → Cria representações vetoriais com API da OpenAI
+4. **Embeddings** → Cria representações vetoriais
 5. **Armazenamento** → Salva embeddings no banco vetorial (FAISS)
 6. **Busca & Geração** → Quando você pergunta, busca os trechos mais relevantes e envia para o Chat
 
@@ -39,7 +39,6 @@ O fluxo ideal é esse aqui:
 Configure no arquivo `.env`:
 
 ```bash
-OPENAI_API_KEY=sua_openai_api_key_aqui
 CHUNK_SIZE=1000
 CHUNK_OVERLAP=200
 EMBEDDING_MODEL=text-embedding-3-small
@@ -50,7 +49,7 @@ CHAT_MODEL=gpt-4o-mini
 As seguintes bibliotecas foram adicionadas:
 
 ```bash
-pip install openai faiss-cpu pypdf2 python-dotenv tiktoken
+pip install faiss-cpu pypdf2 python-dotenv tiktoken
 ```
 
 ## 📁 Estrutura de Arquivos
@@ -80,18 +79,12 @@ pip install openai faiss-cpu pypdf2 python-dotenv tiktoken
 
 ## 🚀 Como Usar
 
-### 1. Configurar API Key
-Edite o arquivo `.env` e adicione sua API key da OpenAI:
-```bash
-OPENAI_API_KEY=sk-sua-key-aqui
-```
-
-### 2. Iniciar o Aplicativo
+### 1. Iniciar o Aplicativo
 ```bash
 python app.py
 ```
 
-### 3. Acessar o RAG
+### 2. Acessar o RAG
 Abra `http://localhost:5000/rag` no navegador
 
 ## 📱 Fluxo de Uso
@@ -144,15 +137,10 @@ O sistema usa:
 - **Sobreposição**: 200 tokens entre chunks
 - **Divisão Inteligente**: Corta em pontos finais
 
-### Embeddings
+### Configuração dos Embeddings
 - **Modelo**: `text-embedding-3-small`
 - **Dimensão**: 1536 dimensões
 - **Armazenamento**: Índices FAISS
-
-### Models OpenAI
-- **Embeddings**: `text-embedding-3-small`
-- **Chat**: `gpt-4o-mini`
-- **Geração de Questões**: `gpt-4o-mini`
 
 ## 🔮 Próximos Passos
 
@@ -196,7 +184,6 @@ Caso encontre problemas:
 1. Verifique os logs do console
 2. Confirme as configurações no `.env`
 3. Teste com um PDF simples primeiro
-4. Verifique o consumo da API OpenAI
 
 ---
 

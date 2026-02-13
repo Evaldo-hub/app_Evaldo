@@ -9,12 +9,7 @@ Configure estas variáveis no painel do Render → Environment:
 DATABASE_URL=postgresql://postgres.texwhpgiaazpyosctjia:@Neia171427@aws-1-sa-east-1.pooler.supabase.com:5432/postgres
 ```
 
-### 2. API OpenAI (Essencial para IA)
-```
-OPENAI_API_KEY=sk-sua-chave-openai-aqui
-```
-
-### 3. Configurações Flask
+### 2. Configurações Flask
 ```
 FLASK_ENV=production
 SECRET_KEY=sua-chave-secreta-para-producao
@@ -33,12 +28,6 @@ PORT=5000
 3. **Rebuild necessário**
    - Após adicionar variáveis, clique "Manual Deploy"
    - Selecione "Latest Commit"
-
-## ⚠️ Importante
-
-- **OPENAI_API_KEY é OBRIGATÓRIA** para funcionalidades de IA
-- Sem ela, o app inicia mas IA fica desativada
-- Configure antes de fazer deploy
 
 ## 🧪 Teste
 

@@ -5,15 +5,6 @@
 
 echo "🚀 Iniciando EBSERH Study App..."
 
-# Verificar OPENAI_API_KEY
-if [ -z "$OPENAI_API_KEY" ]; then
-    echo "⚠️  AVISO: OPENAI_API_KEY não configurada"
-    echo "   Funcionalidades de IA ficarão desativadas"
-    echo "   Configure no painel do Render → Environment"
-else
-    echo "✅ OPENAI_API_KEY configurada"
-fi
-
 # Verificar DATABASE_URL
 if [ -z "$DATABASE_URL" ]; then
     echo "❌ ERRO: DATABASE_URL não configurada"

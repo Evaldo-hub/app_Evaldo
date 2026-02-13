@@ -10,8 +10,6 @@ import numpy as np
 import faiss
 from typing import List, Dict, Tuple, Optional
 from PyPDF2 import PdfReader
-import openai
-from openai import OpenAI
 import tiktoken
 import re
 from dotenv import load_dotenv
@@ -21,15 +19,8 @@ load_dotenv()
 
 class RAGService:
     def __init__(self):
-        api_key = os.getenv('OPENAI_API_KEY')
-        if not api_key:
-            print("AVISO: OPENAI_API_KEY não configurada. RAG Service desativado.")
-            self.client = None
-            self.enabled = False
-            return
-        
-        self.client = OpenAI(api_key=api_key)
-        self.enabled = True
+        self.client = None
+        self.enabled = False
         self.embedding_model = "text-embedding-3-small"
         self.chat_model = "gpt-4o-mini"
         self.chunk_size = 1000
@@ -271,16 +262,11 @@ class RAGService:
     
     def create_embeddings(self, texts: List[str]) -> List[List[float]]:
         """
-        Cria embeddings usando OpenAI API
+        Cria embeddings
         """
         try:
-            response = self.client.embeddings.create(
-                model=self.embedding_model,
-                input=texts
-            )
-            
-            embeddings = [item.embedding for item in response.data]
-            return embeddings
+            # RAG Service desativado - retorna embeddings vazios
+            return []
             
         except Exception as e:
             raise Exception(f"Erro ao criar embeddings: {str(e)}")
